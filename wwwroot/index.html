@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Files and Folders Extraction - Autodesk Forge</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="https://github.com/Autodesk-Forge/learn.forge.viewhubmodels/raw/master/img/favicon.ico">
+    <!-- Common packages: jQuery, Bootstrap, jsTree -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.7/jstree.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.7/themes/default/style.min.css" />
+    <!-- Autodesk Forge Viewer files -->
+    <link rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css" type="text/css">
+    <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
+    <!-- signalR -->
+    <script src="js/signalr/dist/browser/signalr.js"></script>
+    <script src="js/ContentsHub.js"></script>
+    <!-- this project files -->
+    <link href="css/main.css" rel="stylesheet" />
+    <script src="js/ForgeTree.js"></script>
+    <script src="js/Extract.js"></script>
+    <!-- Bootstrap Table-->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+    <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+    
+</head>
+
+<body>
+    <!-- Fixed navbar by Bootstrap: https://getbootstrap.com/examples/navbar-fixed-top/ -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav left">
+                <li>
+                    <a href="http://forge.autodesk.com" target="_blank">
+                        <img alt="Autodesk Forge" src="//developer.static.autodesk.com/images/logo_forge-2-line.png" height="20">
+                    </a>
+                </li>
+            </ul>
+            <div style="float: right; margin-top: 15px;">
+                <span style="padding-right: 5px;" data-toggle="modal" data-target="#provisionAccountModal" title="Enable my BIM 360 Account"><span
+                class="glyphicon glyphicon-cog glyphiconTop mlink"> </span> Enable my BIM 360/ACC Account</span>
+            </div>
+        </div>
+    </nav>
+    <!-- End of navbar -->
+    <div class="container-fluid fill">
+        <div class="row fill">
+            <div class="col-sm-2 fill">
+                <div class="panel panel-default fill">
+                    <div class="panel-heading" data-toggle="tooltip" style="padding: 0px;">
+                        <span id="userInfo"></span>
+                        <span id="refreshHubs" class="glyphicon glyphicon-refresh" style="cursor: pointer; display: none" title="Refresh list of files"></span>
+                        <span id="signOut" class="glyphicon glyphicon-log-out" style="margin-top:5px;cursor: pointer; float: right; display: none" title="Sign out"> </span>
+                    </div>
+                    <div id="userHubs">
+                        <div style="padding-top: 100px; text-align: center;">
+                            <button class="btn btn-lg btn-default" id="autodeskSigninButton">
+                                <img src="https://github.com/Autodesk-Forge/learn.forge.viewhubmodels/raw/master/img/autodesk_text.png"
+                                     height="20"> Sign in
+                            </button>
+                            <br />
+                            <br />
+                            <br /> You may also need to provision your<br /> BIM 360 Docs account for this app.<br />
+                            <a href="https://forge.autodesk.com/blog/bim-360-docs-provisioning-forge-apps">Learn more</a>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8 fill">
+                <div class="row">
+                    <div style="text-align: center;">
+                        <h4>TABLE</h4>
+                    </div>
+                    <div id="items">
+                        <div class="clsInProgress" hidden>
+                            <div style="text-align: center;">
+                                <img src="res/Bars-1s-200px.svg" class="InProgressImg">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="statsView" class="clsResult">
+                        <div class="row">
+                            <div style="padding-top: 10px; text-align: left;">
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-addon beautiful">
+                                            <input type="radio" name="filter_by" value="folderlevel" checked>
+                                        </span>
+                                        <span>
+                                            <label type="text" class="form-control">FOLDER LEVEL</label>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-addon beautiful">
+                                            <input type="radio" name="filter_by" value="filelevel">
+                                        </span>
+                                        <span>
+                                            <label type="text" class="form-control">FILE LEVEL</label>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div style="padding-left: 20px; padding-right: 20px; text-align: left;">
+                                <table class="table table-striped table-bordered table-hover" id="itemsTable">
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2 fill">
+                <div class="row">
+                    <div style="text-align: center;">
+                        <h4>Export Data</h4>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div id="datasets" style="padding-top: 10px; text-align: center; margin-left: 20px;">
+                        <div class="row">
+                            <div style="padding-top: 10px; text-align: left;">
+                                <div class="col-lg-12">
+                                    <div style="text-align: left;">
+                                        <label>Export table data as:</label>
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <input type="radio" name='export' value='csv' checked>
+                                        </span>
+                                        <label class="form-control">csv</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group btn-lg">
+                            <div style="padding-top: 10px;">
+                                <div class="importInProgress" hidden>
+                                    <div style="text-align: center;">
+                                        <img src="res/Bars-1s-200px.svg" class="InProgressImg">
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" id="executeCSV">
+                                    <span class="glyphicon glyphicon-play"></span>Execute
+                                </button>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div style="padding-top: 10px; text-align: left;">
+                                <div class="col-lg-12">
+                                    <div style="text-align: left;">
+                                        <label>Status:</label>
+                                    </div>
+                                    <div class="input-group" id="statusLabel" style="color: rgb(7, 47, 82);">
+                                        <label>waiting for input</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Provision BIM360  -->
+  <div class="modal fade" id="provisionAccountModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title">Thanks for using this sample!</h4>
+        </div>
+        <div class="modal-body">
+          <p>To view your BIM 360/ACC files on this app please authorize my Forge Client ID with your BIM 360/ACC
+            Account.
+          </p>
+          <p>
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#provisionAccountStepsModal">
+              Show me the steps
+              <span class="glyphicon glyphicon-new-window"></span>
+            </button>
+          </p>
+          Use this as Forge Client ID:
+          <div class="input-group">
+            <input type="text" readonly="true" aria-describedby="CopyClientID" id="ClientID" class="form-control" value="" />
+            <span class="input-group-addon" style="cursor: pointer" data-clipboard-target="#ClientID" id="CopyClientID">Copy
+              to clipboard</span>
+          </div>
+          And this App Name:
+          <div class="input-group">
+            <input type="text" readonly="true" aria-describedby="CopyAppName" id="AppName" class="form-control" value="BIM 360 Sample" />
+            <span class="input-group-addon" style="cursor: pointer" data-clipboard-target="#AppName" id="CopyAppName">Copy
+              to clipboard</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="provisionAccountSave">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    new Clipboard('.input-group-addon');
+  </script>
+</body>
+<iframe id="hiddenFrame" style="visibility: hidden; display: none" />
+</html>

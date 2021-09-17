@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "dgSpecHash": "jeQkA0DdR9epYvyi+CFZL2GmGccdqU/Q8UAUMbF2K50uJX0CpO8I0UU5TLCI97LOIpmUvukVaqHQMy9MnCcCag==",
+  "success": true,
+  "projectFilePath": "/Users/joao.martins/Fontes/Samples/Files_n_Folders_Extraction/fileInfoExtract.csproj",
+  "expectedPackageFiles": [
+    "/Users/joao.martins/.nuget/packages/autodesk.forge/1.9.0/autodesk.forge.1.9.0.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/dnsclient/1.4.0/dnsclient.1.4.0.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/hangfire.aspnetcore/1.7.24/hangfire.aspnetcore.1.7.24.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/hangfire.core/1.7.24/hangfire.core.1.7.24.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/hangfire.mongo/0.7.24/hangfire.mongo.0.7.24.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/microsoft.aspnetcore.jsonpatch/3.1.18/microsoft.aspnetcore.jsonpatch.3.1.18.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/3.1.18/microsoft.aspnetcore.mvc.newtonsoftjson.3.1.18.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/microsoft.csharp/4.7.0/microsoft.csharp.4.7.0.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/microsoft.netcore.platforms/2.1.2/microsoft.netcore.platforms.2.1.2.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/mongodb.bson/2.13.1/mongodb.bson.2.13.1.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/mongodb.driver/2.13.1/mongodb.driver.2.13.1.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/mongodb.driver.core/2.13.1/mongodb.driver.core.2.13.1.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/mongodb.libmongocrypt/1.2.2/mongodb.libmongocrypt.1.2.2.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/newtonsoft.json/12.0.3/newtonsoft.json.12.0.3.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/newtonsoft.json.bson/1.0.2/newtonsoft.json.bson.1.0.2.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/restsharp/106.11.7/restsharp.106.11.7.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/sharpcompress/0.23.0/sharpcompress.0.23.0.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/system.buffers/4.5.1/system.buffers.4.5.1.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/system.runtime.compilerservices.unsafe/5.0.0/system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512",
+    "/Users/joao.martins/.nuget/packages/system.text.encoding.codepages/4.5.1/system.text.encoding.codepages.4.5.1.nupkg.sha512"
+  ],
+  "logs": []
+}
