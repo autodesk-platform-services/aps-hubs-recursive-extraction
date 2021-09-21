@@ -65,7 +65,7 @@ $(document).ready(function () {
     });
 
     $('#executeCSV').click(function () {
-        itemsTable.exportData();
+        (!!itemsTable ? itemsTable.exportData() : alert("Please, click on a project and wait for the conclusion of the steps before extracting the data!"));
     });
 
     $.getJSON("/api/forge/clientid", function (res) {
