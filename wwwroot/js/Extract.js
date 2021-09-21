@@ -292,12 +292,6 @@ class ItemsTable {
             (folderContent.type == "folder" ? this.getFolderContents(folderContent) : null);
         }
 
-        if(this.requests==this.responses && this.requests > 0){
-            $('#itemsTable').dragtable({
-                maxMovingRows:1,
-                reorderableColumns:true
-            });
-        }
     }
 
     async updateStatus(){
