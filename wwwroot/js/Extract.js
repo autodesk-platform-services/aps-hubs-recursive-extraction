@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////
 // Copyright (c) Autodesk, Inc. All rights reserved
-// Written by Forge Partner Development
+// Written by APS Partner Development
 //
 // Permission to use, copy, modify, and distribute this software in
 // object code form for any purpose and without fee is hereby granted,
@@ -238,7 +238,7 @@ class ItemsTable {
         this.requests ++;
         this.updateStatus();
         try {
-            const requestUrl = '/api/forge/resource/info';
+            const requestUrl = '/api/aps/resource/info';
             const requestData = {
                 'hubId': this.hubId,
                 'projectId': this.projectId,
@@ -257,7 +257,7 @@ class ItemsTable {
 
     async getReadyItems(dataType, contentsGuid, parentFolderId){
 
-        const requestUrl = 'api/forge/resource/items';
+        const requestUrl = 'api/aps/resource/items';
         const requestData = {
             'jobGuid': contentsGuid
         };

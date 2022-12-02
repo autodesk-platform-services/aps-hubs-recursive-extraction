@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////
 // Copyright (c) Autodesk, Inc. All rights reserved
-// Written by Forge Partner Development
+// Written by APS Partner Development
 //
 // Permission to use, copy, modify, and distribute this software in
 // object code form for any purpose and without fee is hereby granted,
@@ -31,7 +31,7 @@ using MongoDB.Bson;
 using System.Linq;
 using fileInfoExtract.Hubs;
 
-namespace forgeSample.Controllers
+namespace apsSample.Controllers
 {
   public class DataManagementController : ControllerBase
   {
@@ -53,7 +53,7 @@ namespace forgeSample.Controllers
     /// GET TreeNode passing the ID
     /// </summary>
     [HttpGet]
-    [Route("api/forge/datamanagement")]
+    [Route("api/aps/datamanagement")]
     public async Task<IList<jsTreeNode>> GetTreeNodeAsync(string id)
     {
       Credentials = await Credentials.FromSessionAsync(base.Request.Cookies, Response.Cookies);
@@ -78,7 +78,7 @@ namespace forgeSample.Controllers
     }
 
     [HttpGet]
-    [Route("api/forge/resource/info")]
+    [Route("api/aps/resource/info")]
     public object GetResourceInfo()
     {
       string connectionId = base.Request.Query["connectionId"];
@@ -226,7 +226,7 @@ namespace forgeSample.Controllers
     }
 
     [HttpGet]
-    [Route("api/forge/resource/items")]
+    [Route("api/aps/resource/items")]
     public List<dynamic> GetItemsFromDb()
     {
       string jobGuid = base.Request.Query["jobGuid"];

@@ -2,16 +2,16 @@
 <html>
 
 <head>
-    <title>Files and Folders Extraction - Autodesk Forge</title>
+    <title>Files and Folders Extraction - Autodesk Platform Services</title>
     <meta charset="utf-8" />
-    <link rel="shortcut icon" href="https://github.com/Autodesk-Forge/learn.forge.viewhubmodels/raw/master/img/favicon.ico">
+    <link rel="shortcut icon" href="https://cdn.autodesk.io/favicon.ico ">
     <!-- Common packages: jQuery, Bootstrap, jsTree -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.7/jstree.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.7/themes/default/style.min.css" />
-    <!-- Autodesk Forge Viewer files -->
+    <!-- Autodesk Viewer SDK files -->
     <link rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css" type="text/css">
     <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
     <!-- signalR -->
@@ -19,7 +19,7 @@
     <script src="js/ContentsHub.js"></script>
     <!-- this project files -->
     <link href="css/main.css" rel="stylesheet" />
-    <script src="js/ForgeTree.js"></script>
+    <script src="js/APSTree.js"></script>
     <script src="js/Extract.js"></script>
     <!-- Bootstrap Table-->
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
@@ -33,8 +33,8 @@
         <div class="container-fluid">
             <ul class="nav navbar-nav left">
                 <li>
-                    <a href="http://forge.autodesk.com" target="_blank">
-                        <img alt="Autodesk Forge" src="//developer.static.autodesk.com/images/logo_forge-2-line.png" height="20">
+                    <a href="http://aps.autodesk.com" target="_blank">
+                        <img alt="Autodesk Platform Services" src="https://cdn.autodesk.io/logo/black/stacked.png " height="20">
                     </a>
                 </li>
             </ul>
@@ -63,7 +63,7 @@
                             <br />
                             <br />
                             <br /> You may also need to provision your<br /> BIM 360 Docs account for this app.<br />
-                            <a href="https://forge.autodesk.com/blog/bim-360-docs-provisioning-forge-apps">Learn more</a>.
+                            <a href="https://aps.autodesk.com/blog/bim-360-docs-provisioning-forge-apps">Learn more</a>.
                         </div>
                     </div>
                 </div>
@@ -139,11 +139,6 @@
                         </div>
                         <div class="btn-group btn-lg">
                             <div style="padding-top: 10px;">
-                                <!-- <div class="importInProgress" hidden>
-                                    <div style="text-align: center;">
-                                        <img src="res/Bars-1s-200px.svg" class="InProgressImg">
-                                    </div>
-                                </div> -->
                                 <button class="btn btn-primary" id="executeCSV">
                                     <span class="glyphicon glyphicon-play"></span>Execute
                                 </button>
@@ -180,7 +175,7 @@
           <h4 class="modal-title">Thanks for using this sample!</h4>
         </div>
         <div class="modal-body">
-          <p>To view your BIM 360/ACC files on this app please authorize my Forge Client ID with your BIM 360/ACC
+          <p>To view your BIM 360/ACC files on this app please authorize my APS Client ID with your BIM 360/ACC
             Account.
           </p>
           <p>
@@ -189,7 +184,7 @@
               <span class="glyphicon glyphicon-new-window"></span>
             </button>
           </p>
-          Use this as Forge Client ID:
+          Use this as APS Client ID:
           <div class="input-group">
             <input type="text" readonly="true" aria-describedby="CopyClientID" id="ClientID" class="form-control" value="" />
             <span class="input-group-addon" style="cursor: pointer" data-clipboard-target="#ClientID" id="CopyClientID">Copy

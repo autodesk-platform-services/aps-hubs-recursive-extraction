@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////
 // Copyright (c) Autodesk, Inc. All rights reserved
-// Written by Forge Partner Development
+// Written by APS Partner Development
 //
 // Permission to use, copy, modify, and distribute this software in
 // object code form for any purpose and without fee is hereby granted,
@@ -24,12 +24,12 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace forgeSample.Controllers
+namespace apsSample.Controllers
 {
   public class OAuthController : ControllerBase
   {
     [HttpGet]
-    [Route("api/forge/oauth/token")]
+    [Route("api/aps/oauth/token")]
     public async Task<AccessToken> GetPublicTokenAsync()
     {
       Credentials credentials = await Credentials.FromSessionAsync(Request.Cookies, Response.Cookies);
@@ -58,7 +58,7 @@ namespace forgeSample.Controllers
     }
 
     [HttpGet]
-    [Route("api/forge/oauth/signout")]
+    [Route("api/aps/oauth/signout")]
     public IActionResult Singout()
     {
       // finish the session
@@ -68,23 +68,23 @@ namespace forgeSample.Controllers
     }
 
     [HttpGet]
-    [Route("api/forge/oauth/url")]
+    [Route("api/aps/oauth/url")]
     public string GetOAuthURL()
     {
       // prepare the sign in URL
       Scope[] scopes = { Scope.DataRead };
       ThreeLeggedApi _threeLeggedApi = new ThreeLeggedApi();
       string oauthUrl = _threeLeggedApi.Authorize(
-        Credentials.GetAppSetting("FORGE_CLIENT_ID"),
+        Credentials.GetAppSetting("APS_CLIENT_ID"),
         oAuthConstants.CODE,
-        Credentials.GetAppSetting("FORGE_CALLBACK_URL"),
+        Credentials.GetAppSetting("APS_CALLBACK_URL"),
         new Scope[] { Scope.DataRead });
 
       return oauthUrl;
     }
 
     [HttpGet]
-    [Route("api/forge/callback/oauth")] // see Web.Config FORGE_CALLBACK_URL variable
+    [Route("api/aps/callback/oauth")] // see Web.Config APS_CALLBACK_URL variable
     public async Task<IActionResult> OAuthCallbackAsync(string code)
     {
       if (string.IsNullOrWhiteSpace(code)) return Redirect("/");
@@ -95,10 +95,10 @@ namespace forgeSample.Controllers
     }
 
     [HttpGet]
-    [Route("api/forge/clientid")] // see Web.Config FORGE_CALLBACK_URL variable
+    [Route("api/aps/clientid")] // see Web.Config APS_CALLBACK_URL variable
     public dynamic GetClientID()
     {
-      return new { id = Credentials.GetAppSetting("FORGE_CLIENT_ID") };
+      return new { id = Credentials.GetAppSetting("APS_CLIENT_ID") };
     }
   }
 
@@ -107,7 +107,7 @@ namespace forgeSample.Controllers
   /// </summary>
   public class Credentials
   {
-    private const string FORGE_COOKIE = "ForgeApp";
+    private const string APS_COOKIE = "APSApp";
 
     private Credentials() { }
 
@@ -126,11 +126,11 @@ namespace forgeSample.Controllers
       ThreeLeggedApi oauth = new ThreeLeggedApi();
 
       dynamic credentialInternal = await oauth.GettokenAsync(
-        GetAppSetting("FORGE_CLIENT_ID"), GetAppSetting("FORGE_CLIENT_SECRET"),
-        oAuthConstants.AUTHORIZATION_CODE, code, GetAppSetting("FORGE_CALLBACK_URL"));
+        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
+        oAuthConstants.AUTHORIZATION_CODE, code, GetAppSetting("APS_CALLBACK_URL"));
 
       dynamic credentialPublic = await oauth.RefreshtokenAsync(
-        GetAppSetting("FORGE_CLIENT_ID"), GetAppSetting("FORGE_CLIENT_SECRET"),
+        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
         "refresh_token", credentialInternal.refresh_token, new Scope[] { Scope.DataRead });
 
       Credentials credentials = new Credentials();
@@ -139,7 +139,7 @@ namespace forgeSample.Controllers
       credentials.RefreshToken = credentialPublic.refresh_token;
       credentials.ExpiresAt = DateTime.Now.AddSeconds(credentialInternal.expires_in);
 
-      cookies.Append(FORGE_COOKIE, JsonConvert.SerializeObject(credentials));
+      cookies.Append(APS_COOKIE, JsonConvert.SerializeObject(credentials));
 
       return credentials;
     }
@@ -150,14 +150,14 @@ namespace forgeSample.Controllers
     /// <returns></returns>
     public static async Task<Credentials> FromSessionAsync(IRequestCookieCollection requestCookie, IResponseCookies responseCookie)
     {
-      if (requestCookie == null || !requestCookie.ContainsKey(FORGE_COOKIE)) return null;
+      if (requestCookie == null || !requestCookie.ContainsKey(APS_COOKIE)) return null;
 
-      Credentials credentials = JsonConvert.DeserializeObject<Credentials>(requestCookie[FORGE_COOKIE]);
+      Credentials credentials = JsonConvert.DeserializeObject<Credentials>(requestCookie[APS_COOKIE]);
       if (credentials.ExpiresAt < DateTime.Now.Add(new TimeSpan(0, 10, 0)))
       {
         await credentials.RefreshAsync();
-        responseCookie.Delete(FORGE_COOKIE);
-        responseCookie.Append(FORGE_COOKIE, JsonConvert.SerializeObject(credentials));
+        responseCookie.Delete(APS_COOKIE);
+        responseCookie.Append(APS_COOKIE, JsonConvert.SerializeObject(credentials));
       }
 
       return credentials;
@@ -165,7 +165,7 @@ namespace forgeSample.Controllers
 
     public static void Signout(IResponseCookies cookies)
     {
-      cookies.Delete(FORGE_COOKIE);
+      cookies.Delete(APS_COOKIE);
     }
 
     /// <summary>
@@ -177,11 +177,11 @@ namespace forgeSample.Controllers
       ThreeLeggedApi oauth = new ThreeLeggedApi();
 
       dynamic credentialInternal = await oauth.RefreshtokenAsync(
-        GetAppSetting("FORGE_CLIENT_ID"), GetAppSetting("FORGE_CLIENT_SECRET"),
+        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
         "refresh_token", RefreshToken, new Scope[] { Scope.DataRead });
 
       dynamic credentialPublic = await oauth.RefreshtokenAsync(
-        GetAppSetting("FORGE_CLIENT_ID"), GetAppSetting("FORGE_CLIENT_SECRET"),
+        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
         "refresh_token", credentialInternal.refresh_token, new Scope[] { Scope.DataRead });
 
       TokenInternal = credentialInternal.access_token;
