@@ -19,7 +19,7 @@ This sample demonstrate how to retrieve data of all the folders and files on a s
 
 ## Thumbnail
 
-![](thumbnail.gif)
+![](flowthumbnail.gif)
 
 ## Live version
 

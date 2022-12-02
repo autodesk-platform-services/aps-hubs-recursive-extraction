@@ -24,3 +24,5 @@ obj/fileInfoExtract.csproj.nuget.g.props
 obj/fileInfoExtract.csproj.nuget.g.targets
 obj/project.assets.json
 obj/project.nuget.cache
+.vs
+obj
