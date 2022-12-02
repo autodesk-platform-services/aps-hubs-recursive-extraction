@@ -102,7 +102,7 @@ function prepareUserHubsTree() {
           'bim360projects': { 'icon': 'https://cdn.autodesk.io/dm/bim360project-xs.png' },
           'a360projects': { 'icon': 'https://cdn.autodesk.io/dm/a360project-xs.png' },
           'accprojects': {
-            'icon': 'https://cdn.autodesk.io/dm/accproject-xs.png'},
+            'icon': 'https://cdn.autodesk.io/dm/accproject.png'},
             
             'unsupported': { 'icon': 'glyphicon glyphicon-ban-circle' }
         },
