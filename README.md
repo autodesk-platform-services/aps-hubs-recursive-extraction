@@ -88,12 +88,6 @@ At the `.vscode\launch.json`, find the env vars and add your APS Client ID, Secr
 
 Open `http://localhost:3000` to start the app. Select **Index my BIM 360 Account** before using (this process may take a while). Check the `http://localhost:3000/dashboard` to see the jobs running (Hangfire dashboard).
 
-## Deployment
-
-To deploy this application to Heroku, the **Callback URL** for APS must use your `.herokuapp.com` address. After clicking on the button below, at the Heroku Create New App page, set your Client ID, Secret and Callback URL for APS.
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
 # Further Reading
 
 Documentation:
