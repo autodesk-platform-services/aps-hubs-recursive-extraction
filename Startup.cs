@@ -10,7 +10,7 @@ using Hangfire.Mongo.Migration.Strategies.Backup;
 using Hangfire;
 using hubsRecursiveExtraction.Hubs;
 
-namespace fileInfoExtract
+namespace hubsRecursiveExtraction
 {
   public class Startup
   {
