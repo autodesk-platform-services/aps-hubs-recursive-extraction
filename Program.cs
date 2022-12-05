@@ -1,4 +1,4 @@
-using fileInfoExtract.Hubs;
+using hubsRecursiveExtraction.Hubs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;

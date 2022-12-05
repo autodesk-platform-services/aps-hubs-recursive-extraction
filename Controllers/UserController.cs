@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
-namespace apsSample.Controllers
+namespace hubsRecursiveExtraction.Controllers
 {
   public class UserController : ControllerBase
   {

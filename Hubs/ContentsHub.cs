@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace fileInfoExtract.Hubs
+namespace hubsRecursiveExtraction.Hubs
 {
   public class ContentsHub : Microsoft.AspNetCore.SignalR.Hub
   {

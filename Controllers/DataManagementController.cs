@@ -29,9 +29,9 @@ using Microsoft.AspNetCore.SignalR;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
 using System.Linq;
-using fileInfoExtract.Hubs;
+using hubsRecursiveExtraction.Hubs;
 
-namespace apsSample.Controllers
+namespace hubsRecursiveExtraction.Controllers
 {
   public class DataManagementController : ControllerBase
   {

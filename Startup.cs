@@ -8,7 +8,7 @@ using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
 using Hangfire;
-using fileInfoExtract.Hubs;
+using hubsRecursiveExtraction.Hubs;
 
 namespace fileInfoExtract
 {

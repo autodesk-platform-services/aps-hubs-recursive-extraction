@@ -24,7 +24,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace apsSample.Controllers
+namespace hubsRecursiveExtraction.Controllers
 {
   public class OAuthController : ControllerBase
   {
