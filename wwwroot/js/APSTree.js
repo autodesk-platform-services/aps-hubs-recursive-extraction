@@ -55,7 +55,7 @@ $(document).ready(function () {
         });
     });
 
-    $('input[type=radio][name=filter_by]').change(function() {
+    $('input[type=radio][name=filter_by]').change(function () {
         itemsTable.refreshTable();
     });
 
@@ -75,7 +75,7 @@ $(document).ready(function () {
             $('#userHubs').jstree(true).refresh();
         });
     });
-    
+
 });
 
 function prepareUserHubsTree() {
@@ -97,13 +97,14 @@ function prepareUserHubsTree() {
             'default': { 'icon': 'glyphicon glyphicon-question-sign' },
             '#': { 'icon': 'glyphicon glyphicon-user' },
             'hubs': { 'icon': 'https://github.com/Autodesk-Platform-Services/bim360appstore-data.management-nodejs-transfer.storage/raw/master/www/img/a360hub.png' },
-          'personalHub': { 'icon': 'https://cdn.autodesk.io/dm/a360hub-xs.png' },
-          'bim360Hubs': { 'icon': 'https://cdn.autodesk.io/dm/bim360hub-xs.png' },
-          'bim360projects': { 'icon': 'https://cdn.autodesk.io/dm/bim360project-xs.png' },
-          'a360projects': { 'icon': 'https://cdn.autodesk.io/dm/a360project-xs.png' },
-          'accprojects': {
-            'icon': 'https://cdn.autodesk.io/dm/accproject.png'},
-            
+            'personalHub': { 'icon': 'https://cdn.autodesk.io/dm/a360hub.png' },
+            'bim360Hubs': { 'icon': 'https://cdn.autodesk.io/dm/bim360hub.png' },
+            'bim360projects': { 'icon': 'https://cdn.autodesk.io/dm/bim360project.png' },
+            'a360projects': { 'icon': 'https://cdn.autodesk.io/dm/a360project.png' },
+            'accprojects': {
+                'icon': 'https://cdn.autodesk.io/dm/accproject.png'
+            },
+
             'unsupported': { 'icon': 'glyphicon glyphicon-ban-circle' }
         },
         "sort": function (a, b) {
@@ -123,7 +124,7 @@ function prepareUserHubsTree() {
     }).bind("activate_node.jstree", function (evt, data) {
         if (data != null && data.node != null && (data.node.type == 'accprojects' || data.node.type == 'bim360projects')) {
             $('#statusLabel').empty();
-            $('#statusLabel').append('<label>reading project '+data.node.text+'...</label>');
+            $('#statusLabel').append('<label>reading project ' + data.node.text + '...</label>');
             itemsTable = new ItemsTable("itemsTable", data.node.id.split('/')[6], data.node.id.split('/')[8]);
             itemsTable.getReport();
         }
