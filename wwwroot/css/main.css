@@ -17,3 +17,7 @@ body {
     width: 100%;
     height: calc(100vh - 150px);
 }
+
+.jstree-themeicon-custom {
+  background-size: 24px !important;
+}
