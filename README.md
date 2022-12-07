@@ -19,11 +19,13 @@ This sample demonstrate how to retrieve data of all the folders and files on a s
 
 ## Thumbnail
 
-![](flowthumbnail.gif)
+![thumbnail](thumbnail.png)
 
 ## Live version
 
-Try it at https://filesnfoldersextraction.herokuapp.com
+Try it at https://aps-hubs-recursive-extraction.autodesk.io/
+
+![](flowthumbnail.gif)
 
 # Setup
 
