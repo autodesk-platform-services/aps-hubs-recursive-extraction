@@ -20,9 +20,7 @@ var connection = new signalR.HubConnectionBuilder().withUrl("/contentshub").buil
 
 connection.on("ReceiveContents", function (contentsGuid, dataType, guid, parentFolderId) {
   if(guid === itemsTable.guid){
-
     itemsTable.getReadyItems(dataType, contentsGuid, parentFolderId)
-
   }
 });
 
