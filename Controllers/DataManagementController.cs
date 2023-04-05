@@ -91,7 +91,7 @@ namespace hubsRecursiveExtraction.Controllers
 
       string jobId = BackgroundJob.Enqueue(() =>
         // the API SDK
-        GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, Credentials.TokenInternal)
+        GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, Credentials.TokenInternal).GetAwaiter().GetResult()
       );
 
       return new { Success = true };
