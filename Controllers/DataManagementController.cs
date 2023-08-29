@@ -119,15 +119,11 @@ namespace hubsRecursiveExtraction.Controllers
         {
             if (ex.ErrorCode == 429)
             {
-                Console.WriteLine(ex.ErrorContent);
-                Console.WriteLine("Waiting for 45 seconds...");
                 await Task.Delay(TimeSpan.FromSeconds(45));
-                Console.WriteLine("Now running the delayed function.");
                 await GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, token);
             }
             else
             {
-                Console.WriteLine(ex.ErrorContent);
                 throw; // Re-throw the exception if it's not a Too Many Requests error
             }
         }
