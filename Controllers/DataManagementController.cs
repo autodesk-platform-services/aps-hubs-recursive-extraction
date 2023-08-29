@@ -30,6 +30,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
 using System.Linq;
 using hubsRecursiveExtraction.Hubs;
+using Autodesk.Forge.Client;
 
 namespace hubsRecursiveExtraction.Controllers
 {
@@ -97,20 +98,41 @@ namespace hubsRecursiveExtraction.Controllers
       return new { Success = true };
     }
 
-    public async Task GatherData(string connectionId, string hubId, string projectId, string currentFolderId, string dataType, string projectGuid, string token)
+    public async Task GatherData(string connectionId, string hubId, string projectId, string currentFolderId,
+        string dataType, string projectGuid, string token)
     {
-      switch (dataType)
-      {
-        case "topFolders":
-          await GetProjectContents(hubId, projectId, connectionId, dataType, projectGuid, token);
-          break;
-        case "folder":
-          await GetFolderContents(projectId, currentFolderId, connectionId, dataType, projectGuid, token);
-          break;
-        default:
-          break;
-      }
+        try
+        {
+            switch (dataType)
+            {
+                case "topFolders":
+                    await GetProjectContents(hubId, projectId, connectionId, dataType, projectGuid, token);
+                    break;
+                case "folder":
+                    await GetFolderContents(projectId, currentFolderId, connectionId, dataType, projectGuid, token);
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (ApiException ex)
+        {
+            if (ex.ErrorCode == 429)
+            {
+                Console.WriteLine(ex.ErrorContent);
+                Console.WriteLine("Waiting for 45 seconds...");
+                await Task.Delay(TimeSpan.FromSeconds(45));
+                Console.WriteLine("Now running the delayed function.");
+                await GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, token);
+            }
+            else
+            {
+                Console.WriteLine(ex.ErrorContent);
+                throw; // Re-throw the exception if it's not a Too Many Requests error
+            }
+        }
     }
+
 
     private async Task<IList<jsTreeNode>> GetHubsAsync()
     {
