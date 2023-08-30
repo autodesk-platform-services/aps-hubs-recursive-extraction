@@ -47,10 +47,11 @@ const fileSpecificFields = {
 }
 
 class ItemsTable {
-    constructor(tableId, hubId, projectId) {
+    constructor(tableId, hubId, projectId, projectName) {
         this.tableId = tableId;
         this.hubId = hubId;
         this.projectId = projectId;
+        this.projectName = projectName;
         this.items = [];
         this.dataSet = [];
         this.fullPaths = {};
