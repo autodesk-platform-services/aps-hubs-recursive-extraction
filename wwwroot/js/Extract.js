@@ -74,13 +74,18 @@ class ItemsTable {
     exportTableAsCSV() {
         let csvData = this.getTableData();
         let csvDataCleared = this.cleanForCommas(csvData);
-        let csvString = csvDataCleared.join("%0A");
+        // Convert the CSV data to a Blob
+        let csvBlob = new Blob([csvDataCleared.join("\n")], { type: 'text/csv' });
+        // Create an object URL from the Blob
+        let csvURL = URL.createObjectURL(csvBlob);
         let a = document.createElement('a');
-        a.href = 'data:attachment/csv,' + csvString;
+        a.href = csvURL;
         a.target = '_blank';
-        a.download = 'ExportedData' + (new Date()).getTime() + '.csv';
+        a.download = this.projectName + " " + 'ExportedData ' + (new Date()).getTime() + '.csv';
         document.body.appendChild(a);
         a.click();
+        // Clean up the object URL
+        URL.revokeObjectURL(csvURL);
     }
 
     getVisibleColumns() {
