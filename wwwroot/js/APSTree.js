@@ -125,7 +125,7 @@ function prepareUserHubsTree() {
         if (data != null && data.node != null && (data.node.type == 'accprojects' || data.node.type == 'bim360projects')) {
             $('#statusLabel').empty();
             $('#statusLabel').append('<label>reading project ' + data.node.text + '...</label>');
-            itemsTable = new ItemsTable("itemsTable", data.node.id.split('/')[6], data.node.id.split('/')[8]);
+            itemsTable = new ItemsTable("itemsTable", data.node.id.split('/')[6], data.node.id.split('/')[8], data.node.text);
             itemsTable.getReport();
         }
     });
