@@ -1,4 +1,3 @@
-using hubsRecursiveExtraction.Hubs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -9,22 +8,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace hubsRecursiveExtraction
+public class Program
 {
-  public class Program
+  public static void Main(string[] args)
   {
-    public static void Main(string[] args)
-    {
-      var host = CreateHostBuilder(args).Build();
-      var hubContext = host.Services.GetService(typeof(IHubContext<ContentsHub>));
-      host.Run();
-    }
-
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-              webBuilder.UseStartup<Startup>();
-            });
+    var host = CreateHostBuilder(args).Build();
+    var hubContext = host.Services.GetService(typeof(IHubContext<ContentsHub>));
+    host.Run();
   }
+
+  public static IHostBuilder CreateHostBuilder(string[] args) =>
+      Host.CreateDefaultBuilder(args)
+          .ConfigureWebHostDefaults(webBuilder =>
+          {
+            webBuilder.UseStartup<Startup>();
+          });
 }
+

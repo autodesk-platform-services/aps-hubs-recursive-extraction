@@ -26,3 +26,4 @@ obj/project.assets.json
 obj/project.nuget.cache
 .vs
 obj
+/bin

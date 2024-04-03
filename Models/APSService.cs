@@ -1,0 +1,117 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Autodesk.Authentication;
+using Autodesk.Authentication.Model;
+using Autodesk.DataManagement;
+using Autodesk.SDKManager;
+using Autodesk.DataManagement.Model;
+
+public class Tokens
+{
+    public string InternalToken;
+    public string PublicToken;
+    public string RefreshToken;
+    public DateTime ExpiresAt;
+}
+
+public partial class APSService
+{
+    private readonly string _clientId;
+    private readonly string _clientSecret;
+    private readonly string _callbackUri;
+    private readonly AuthenticationClient _authClient;
+    private readonly DataManagementClient _dataManagementClient;
+    private readonly List<Scopes> InternalTokenScopes = new List<Scopes> { Scopes.DataRead, Scopes.ViewablesRead };
+    private readonly List<Scopes> PublicTokenScopes = new List<Scopes> { Scopes.DataRead, Scopes.ViewablesRead };
+
+    public APSService(string clientId, string clientSecret, string callbackUri)
+    {
+        _clientId = clientId;
+        _clientSecret = clientSecret;
+        _callbackUri = callbackUri;
+        SDKManager sdkManager = SdkManagerBuilder
+                .Create() // Creates SDK Manager Builder itself.
+                .Build();
+
+        _authClient = new AuthenticationClient(sdkManager);
+        _dataManagementClient = new DataManagementClient(sdkManager);
+
+    }
+
+    public string GetAuthorizationURL()
+    {
+        return _authClient.Authorize(_clientId, ResponseType.Code, _callbackUri, InternalTokenScopes);
+    }
+
+    public async Task<Tokens> GenerateTokens(string code)
+    {
+        ThreeLeggedToken internalAuth = await _authClient.GetThreeLeggedTokenAsync(_clientId, _clientSecret, code, _callbackUri);
+        RefreshToken publicAuth = await _authClient.GetRefreshTokenAsync(_clientId, _clientSecret, internalAuth.RefreshToken, PublicTokenScopes);
+        return new Tokens
+        {
+            PublicToken = publicAuth.AccessToken,
+            InternalToken = internalAuth.AccessToken,
+            RefreshToken = publicAuth._RefreshToken,
+            ExpiresAt = DateTime.Now.ToUniversalTime().AddSeconds((double)internalAuth.ExpiresIn)
+        };
+    }
+
+    public async Task<Tokens> RefreshTokens(Tokens tokens)
+    {
+        RefreshToken internalAuth = await _authClient.GetRefreshTokenAsync(_clientId, _clientSecret, tokens.RefreshToken, InternalTokenScopes);
+        RefreshToken publicAuth = await _authClient.GetRefreshTokenAsync(_clientId, _clientSecret, internalAuth._RefreshToken, PublicTokenScopes);
+        return new Tokens
+        {
+            PublicToken = publicAuth.AccessToken,
+            InternalToken = internalAuth.AccessToken,
+            RefreshToken = publicAuth._RefreshToken,
+            ExpiresAt = DateTime.Now.ToUniversalTime().AddSeconds((double)internalAuth.ExpiresIn).AddSeconds(-1700)
+        };
+    }
+
+    public async Task<dynamic> GetUserProfile(Tokens tokens)
+    {
+        return "";
+        // var api = new UserProfileApi();
+        // api.Configuration.AccessToken = tokens.InternalToken;
+        // dynamic profile = await api.GetUserProfileAsync();
+        // return profile;
+    }
+
+    public async Task<IEnumerable<dynamic>> GetVersions(string projectId, string itemId, Tokens tokens)
+    {
+        Versions versions = await _dataManagementClient.GetItemVersionsAsync(projectId, itemId);
+        return versions.Data;
+    }
+
+    public async Task<IEnumerable<HubsData>> GetHubsDataAsync()
+    {
+        Hubs hubs = await _dataManagementClient.GetHubsAsync();
+        return hubs.Data;
+    }
+
+    public async Task<IEnumerable<ProjectsData>> GetProjectsDatasAsync(string hubId)
+    {
+        Projects projects = await _dataManagementClient.GetHubProjectsAsync(hubId);
+        return projects.Data;
+    }
+
+    public async Task<IEnumerable<TopFoldersData>> GetTopFoldersDatasAsync(string hubId, string projectId)
+    {
+        TopFolders topFolders = await _dataManagementClient.GetProjectTopFoldersAsync(hubId, projectId);
+        return topFolders.Data;
+    }
+
+    public async Task<FolderContents> GetFolderContentsDatasAsync(string projectId, string folderUrn)
+    {
+        FolderContents folderContents = await _dataManagementClient.GetFolderContentsAsync(projectId, folderUrn);
+        return folderContents;
+    }
+
+    internal async Task<FolderContents> GetFolderContentsDatasAsync(string projectId, string folderId, int pageNumber)
+    {
+        FolderContents folderContents = await _dataManagementClient.GetFolderContentsAsync(projectId, folderId, null, null, null, null, null, pageNumber);
+        return folderContents;
+    }
+}

@@ -16,186 +16,108 @@
 // UNINTERRUPTED OR ERROR FREE.
 /////////////////////////////////////////////////////////////////////
 
-using Autodesk.Forge;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace hubsRecursiveExtraction.Controllers
+
+[ApiController]
+[Route("api/[controller]")]
+public class OAuthController : ControllerBase
 {
-  public class OAuthController : ControllerBase
+  public readonly APSService _apsService;
+  public readonly IHubContext<ContentsHub> _contentsHub;
+
+  public OAuthController(IHubContext<ContentsHub> contentsHub, APSService apsService)
   {
-    [HttpGet]
-    [Route("api/aps/oauth/token")]
-    public async Task<AccessToken> GetPublicTokenAsync()
-    {
-      Credentials credentials = await Credentials.FromSessionAsync(Request.Cookies, Response.Cookies);
-
-      if (credentials == null)
-      {
-        base.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-        return new AccessToken();
-      }
-
-      // return the public (viewables:read) access token
-      return new AccessToken()
-      {
-        access_token = credentials.TokenPublic,
-        expires_in = (int)credentials.ExpiresAt.Subtract(DateTime.Now).TotalSeconds
-      };
-    }
-
-    /// <summary>
-    /// Response for GetPublicToken
-    /// </summary>
-    public struct AccessToken
-    {
-      public string access_token { get; set; }
-      public int expires_in { get; set; }
-    }
-
-    [HttpGet]
-    [Route("api/aps/oauth/signout")]
-    public IActionResult Singout()
-    {
-      // finish the session
-      Credentials.Signout(base.Response.Cookies);
-
-      return Redirect("/");
-    }
-
-    [HttpGet]
-    [Route("api/aps/oauth/url")]
-    public string GetOAuthURL()
-    {
-      // prepare the sign in URL
-      Scope[] scopes = { Scope.DataRead };
-      ThreeLeggedApi _threeLeggedApi = new ThreeLeggedApi();
-      string oauthUrl = _threeLeggedApi.Authorize(
-        Credentials.GetAppSetting("APS_CLIENT_ID"),
-        oAuthConstants.CODE,
-        Credentials.GetAppSetting("APS_CALLBACK_URL"),
-        new Scope[] { Scope.DataRead });
-
-      return oauthUrl;
-    }
-
-    [HttpGet]
-    [Route("api/aps/callback/oauth")] // see Web.Config APS_CALLBACK_URL variable
-    public async Task<IActionResult> OAuthCallbackAsync(string code)
-    {
-      if (string.IsNullOrWhiteSpace(code)) return Redirect("/");
-      // create credentials form the oAuth CODE
-      Credentials credentials = await Credentials.CreateFromCodeAsync(code, Response.Cookies);
-
-      return Redirect("/");
-    }
-
-    [HttpGet]
-    [Route("api/aps/clientid")] // see Web.Config APS_CALLBACK_URL variable
-    public dynamic GetClientID()
-    {
-      return new { id = Credentials.GetAppSetting("APS_CLIENT_ID") };
-    }
+    _contentsHub = contentsHub;
+    _apsService = apsService;
+    GC.KeepAlive(_contentsHub);
   }
 
-  /// <summary>
-  /// Store data in session
-  /// </summary>
-  public class Credentials
+  public static async Task<Tokens> PrepareTokens(HttpRequest request, HttpResponse response, APSService forgeService)
   {
-    private const string APS_COOKIE = "APSApp";
-
-    private Credentials() { }
-
-    public string TokenInternal { get; set; }
-    public string TokenPublic { get; set; }
-    public string RefreshToken { get; set; }
-    public DateTime ExpiresAt { get; set; }
-
-    /// <summary>
-    /// Perform the OAuth authorization via code
-    /// </summary>
-    /// <param name="code"></param>
-    /// <returns></returns>
-    public static async Task<Credentials> CreateFromCodeAsync(string code, IResponseCookies cookies)
+    if (!request.Cookies.ContainsKey("internal_token"))
     {
-      ThreeLeggedApi oauth = new ThreeLeggedApi();
-
-      dynamic credentialInternal = await oauth.GettokenAsync(
-        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
-        oAuthConstants.AUTHORIZATION_CODE, code, GetAppSetting("APS_CALLBACK_URL"));
-
-      dynamic credentialPublic = await oauth.RefreshtokenAsync(
-        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
-        "refresh_token", credentialInternal.refresh_token, new Scope[] { Scope.DataRead });
-
-      Credentials credentials = new Credentials();
-      credentials.TokenInternal = credentialInternal.access_token;
-      credentials.TokenPublic = credentialPublic.access_token;
-      credentials.RefreshToken = credentialPublic.refresh_token;
-      credentials.ExpiresAt = DateTime.Now.AddSeconds(credentialInternal.expires_in);
-
-      cookies.Append(APS_COOKIE, JsonConvert.SerializeObject(credentials));
-
-      return credentials;
+      return null;
     }
-
-    /// <summary>
-    /// Restore the credentials from the session object, refresh if needed
-    /// </summary>
-    /// <returns></returns>
-    public static async Task<Credentials> FromSessionAsync(IRequestCookieCollection requestCookie, IResponseCookies responseCookie)
+    var tokens = new Tokens
     {
-      if (requestCookie == null || !requestCookie.ContainsKey(APS_COOKIE)) return null;
-
-      Credentials credentials = JsonConvert.DeserializeObject<Credentials>(requestCookie[APS_COOKIE]);
-      if (credentials.ExpiresAt < DateTime.Now.Add(new TimeSpan(0, 10, 0)))
-      {
-        await credentials.RefreshAsync();
-        responseCookie.Delete(APS_COOKIE);
-        responseCookie.Append(APS_COOKIE, JsonConvert.SerializeObject(credentials));
-      }
-
-      return credentials;
-    }
-
-    public static void Signout(IResponseCookies cookies)
+      PublicToken = request.Cookies["public_token"],
+      InternalToken = request.Cookies["internal_token"],
+      RefreshToken = request.Cookies["refresh_token"],
+      ExpiresAt = DateTime.Parse(request.Cookies["expires_at"])
+    };
+    if (tokens.ExpiresAt < DateTime.Now.ToUniversalTime())
     {
-      cookies.Delete(APS_COOKIE);
+      tokens = await forgeService.RefreshTokens(tokens);
+      response.Cookies.Append("public_token", tokens.PublicToken);
+      response.Cookies.Append("internal_token", tokens.InternalToken);
+      response.Cookies.Append("refresh_token", tokens.RefreshToken);
+      response.Cookies.Append("expires_at", tokens.ExpiresAt.ToString());
     }
+    return tokens;
+  }
 
-    /// <summary>
-    /// Refresh the credentials (internal & external)
-    /// </summary>
-    /// <returns></returns>
-    private async Task RefreshAsync()
+  [HttpGet("signin")]
+  public ActionResult Signin()
+  {
+    var redirectUri = _apsService.GetAuthorizationURL();
+    return Redirect(redirectUri);
+  }
+
+  [HttpGet("signout")]
+  public ActionResult Signout()
+  {
+    Response.Cookies.Delete("public_token");
+    Response.Cookies.Delete("internal_token");
+    Response.Cookies.Delete("refresh_token");
+    Response.Cookies.Delete("expires_at");
+    return Redirect("/");
+  }
+
+  [HttpGet("callback")]
+  public async Task<ActionResult> Callback(string code)
+  {
+    var tokens = await _apsService.GenerateTokens(code);
+    Response.Cookies.Append("public_token", tokens.PublicToken);
+    Response.Cookies.Append("internal_token", tokens.InternalToken);
+    Response.Cookies.Append("refresh_token", tokens.RefreshToken);
+    Response.Cookies.Append("expires_at", tokens.ExpiresAt.ToString());
+    return Redirect("/");
+  }
+
+  [HttpGet("profile")]
+  public async Task<dynamic> GetProfile()
+  {
+    var tokens = await PrepareTokens(Request, Response, _apsService);
+    if (tokens == null)
     {
-      ThreeLeggedApi oauth = new ThreeLeggedApi();
-
-      dynamic credentialInternal = await oauth.RefreshtokenAsync(
-        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
-        "refresh_token", RefreshToken, new Scope[] { Scope.DataRead });
-
-      dynamic credentialPublic = await oauth.RefreshtokenAsync(
-        GetAppSetting("APS_CLIENT_ID"), GetAppSetting("APS_CLIENT_SECRET"),
-        "refresh_token", credentialInternal.refresh_token, new Scope[] { Scope.DataRead });
-
-      TokenInternal = credentialInternal.access_token;
-      TokenPublic = credentialPublic.access_token;
-      RefreshToken = credentialPublic.refresh_token;
-      ExpiresAt = DateTime.Now.AddSeconds(credentialInternal.expires_in);
+      return Unauthorized();
     }
-
-    /// <summary>
-    /// Reads appsettings from web.config
-    /// </summary>
-    public static string GetAppSetting(string settingKey)
+    dynamic profile = await _apsService.GetUserProfile(tokens);
+    return new
     {
-      return Environment.GetEnvironmentVariable(settingKey);
+      name = string.Format("{0} {1}", profile.firstName, profile.lastName)
+    };
+  }
+
+  [HttpGet("token")]
+  public async Task<dynamic> GetPublicToken()
+  {
+    var tokens = await PrepareTokens(Request, Response, _apsService);
+    if (tokens == null)
+    {
+      return Unauthorized();
     }
+    return new
+    {
+      access_token = tokens.PublicToken,
+      token_type = "Bearer",
+      expires_in = Math.Floor((tokens.ExpiresAt - DateTime.Now.ToUniversalTime()).TotalSeconds)
+    };
   }
 }
