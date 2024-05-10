@@ -46,6 +46,7 @@ public class Startup
     });
     services.AddHangfireServer();
 
+    services.AddControllers();
     services.AddSignalR(o =>
     {
       o.EnableDetailedErrors = true;
@@ -78,10 +79,10 @@ public class Startup
     app.UseRouting();
     app.UseEndpoints(endpoints =>
     {
+      endpoints.MapControllers();
       endpoints.MapHub<ContentsHub>("/contentshub");
     });
 
-    app.UseMvc();
   }
 
 }

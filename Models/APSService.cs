@@ -85,33 +85,33 @@ public partial class APSService
         return versions.Data;
     }
 
-    public async Task<IEnumerable<HubsData>> GetHubsDataAsync()
+    public async Task<IEnumerable<HubsData>> GetHubsDataAsync(Tokens tokens)
     {
-        Hubs hubs = await _dataManagementClient.GetHubsAsync();
+        Hubs hubs = await _dataManagementClient.GetHubsAsync(accessToken: tokens.InternalToken);
         return hubs.Data;
     }
 
-    public async Task<IEnumerable<ProjectsData>> GetProjectsDatasAsync(string hubId)
+    public async Task<IEnumerable<ProjectsData>> GetProjectsDatasAsync(string hubId, Tokens tokens)
     {
-        Projects projects = await _dataManagementClient.GetHubProjectsAsync(hubId);
+        Projects projects = await _dataManagementClient.GetHubProjectsAsync(hubId, accessToken: tokens.InternalToken);
         return projects.Data;
     }
 
-    public async Task<IEnumerable<TopFoldersData>> GetTopFoldersDatasAsync(string hubId, string projectId)
+    public async Task<IEnumerable<TopFoldersData>> GetTopFoldersDatasAsync(string hubId, string projectId, Tokens tokens)
     {
-        TopFolders topFolders = await _dataManagementClient.GetProjectTopFoldersAsync(hubId, projectId);
+        TopFolders topFolders = await _dataManagementClient.GetProjectTopFoldersAsync(hubId, projectId, accessToken: tokens.InternalToken);
         return topFolders.Data;
     }
 
-    public async Task<FolderContents> GetFolderContentsDatasAsync(string projectId, string folderUrn)
+    public async Task<FolderContents> GetFolderContentsDatasAsync(string projectId, string folderUrn, Tokens tokens)
     {
-        FolderContents folderContents = await _dataManagementClient.GetFolderContentsAsync(projectId, folderUrn);
+        FolderContents folderContents = await _dataManagementClient.GetFolderContentsAsync(projectId, folderUrn, accessToken: tokens.InternalToken);
         return folderContents;
     }
 
-    internal async Task<FolderContents> GetFolderContentsDatasAsync(string projectId, string folderId, int pageNumber)
+    internal async Task<FolderContents> GetFolderContentsDatasAsync(string projectId, string folderId, int pageNumber, Tokens tokens)
     {
-        FolderContents folderContents = await _dataManagementClient.GetFolderContentsAsync(projectId, folderId, null, null, null, null, null, pageNumber);
+        FolderContents folderContents = await _dataManagementClient.GetFolderContentsAsync(projectId, folderId, pageNumber: pageNumber, accessToken: tokens.InternalToken);
         return folderContents;
     }
 }

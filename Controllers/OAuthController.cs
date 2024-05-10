@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/aps/[controller]")]
 public class OAuthController : ControllerBase
 {
   public readonly APSService _apsService;

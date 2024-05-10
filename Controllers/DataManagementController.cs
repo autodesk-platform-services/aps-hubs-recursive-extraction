@@ -32,7 +32,6 @@ using Autodesk.DataManagement.Model;
 
 public class DataManagementController : ControllerBase
 {
-
   public readonly IHubContext<ContentsHub> _contentsHub;
   public readonly APSService _apsService;
 
@@ -44,24 +43,22 @@ public class DataManagementController : ControllerBase
   }
 
   /// <summary>
-  /// Credentials on this request
-  /// </summary>
-  public Credentials Credentials { get; set; }
-
-  /// <summary>
   /// GET TreeNode passing the ID
   /// </summary>
   [HttpGet]
   [Route("api/aps/datamanagement")]
   public async Task<IList<jsTreeNode>> GetTreeNodeAsync(string id)
   {
-    Credentials = await Credentials.FromSessionAsync(base.Request.Cookies, Response.Cookies);
-    if (Credentials == null) { return null; }
+    Tokens tokens = await OAuthController.PrepareTokens(Request, Response, _apsService);
+    if (tokens == null)
+    {
+      return null;
+    }
 
     IList<jsTreeNode> nodes = new List<jsTreeNode>();
 
     if (id == "#") // root
-      return await GetHubsAsync();
+      return await GetHubsAsync(tokens);
     else
     {
       string[] idParams = id.Split('/');
@@ -69,7 +66,7 @@ public class DataManagementController : ControllerBase
       switch (resource)
       {
         case "hubs": // hubs node selected/expanded, show projects
-          return await GetProjectsAsync(id);
+          return await GetProjectsAsync(id, tokens);
       }
     }
 
@@ -86,36 +83,41 @@ public class DataManagementController : ControllerBase
     string currentFolderId = base.Request.Query["folderId"];
     string dataType = base.Request.Query["dataType"];
     string projectGuid = base.Request.Query["guid"];
-    Credentials = Credentials.FromSessionAsync(base.Request.Cookies, Response.Cookies).GetAwaiter().GetResult();
+
+    Tokens tokens = OAuthController.PrepareTokens(Request, Response, _apsService).GetAwaiter().GetResult();
+    if (tokens == null)
+    {
+      return null;
+    }
 
     string jobId = BackgroundJob.Enqueue(() =>
       // the API SDK
-      GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, Credentials.TokenInternal).GetAwaiter().GetResult()
+      GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, tokens).GetAwaiter().GetResult()
     );
 
     return new { Success = true };
   }
 
-  public async Task GatherData(string connectionId, string hubId, string projectId, string currentFolderId, string dataType, string projectGuid, string token)
+  public async Task GatherData(string connectionId, string hubId, string projectId, string currentFolderId, string dataType, string projectGuid, Tokens tokens)
   {
     switch (dataType)
     {
       case "topFolders":
-        await GetProjectContents(hubId, projectId, connectionId, dataType, projectGuid, token);
+        await GetProjectContents(hubId, projectId, connectionId, dataType, projectGuid, tokens);
         break;
       case "folder":
-        await GetFolderContents(projectId, currentFolderId, connectionId, dataType, projectGuid, token);
+        await GetFolderContents(projectId, currentFolderId, connectionId, dataType, projectGuid, tokens);
         break;
       default:
         break;
     }
   }
 
-  private async Task<IList<jsTreeNode>> GetHubsAsync()
+  private async Task<IList<jsTreeNode>> GetHubsAsync(Tokens tokens)
   {
     IList<jsTreeNode> nodes = new List<jsTreeNode>();
 
-    List<HubsData> hubs = (List<HubsData>)await _apsService.GetHubsDataAsync();
+    List<HubsData> hubs = (List<HubsData>)await _apsService.GetHubsDataAsync(tokens);
     foreach (HubsData hubData in hubs)
     {
       string nodeType = "hubs";
@@ -138,7 +140,7 @@ public class DataManagementController : ControllerBase
     return nodes;
   }
 
-  private async Task<IList<jsTreeNode>> GetProjectsAsync(string href)
+  private async Task<IList<jsTreeNode>> GetProjectsAsync(string href, Tokens tokens)
   {
     IList<jsTreeNode> nodes = new List<jsTreeNode>();
 
@@ -146,7 +148,7 @@ public class DataManagementController : ControllerBase
     string[] idParams = href.Split('/');
     string hubId = idParams[idParams.Length - 1];
 
-    List<ProjectsData> projects = (List<ProjectsData>)await _apsService.GetProjectsDatasAsync(hubId);
+    List<ProjectsData> projects = (List<ProjectsData>)await _apsService.GetProjectsDatasAsync(hubId, tokens);
     foreach (ProjectsData project in projects)
     {
       // check the type of the project to show an icon
@@ -175,12 +177,12 @@ public class DataManagementController : ControllerBase
     return nodes;
   }
 
-  public async Task GetProjectContents(string hubId, string projectId, string connectionId, string dataType, string projectGuid, string token)
+  public async Task GetProjectContents(string hubId, string projectId, string connectionId, string dataType, string projectGuid, Tokens tokens)
   {
     List<dynamic> topfolders = new List<dynamic>();
 
-    List<FolderContentsData> folderContentsDatas = (List<FolderContentsData>)await _apsService.GetTopFoldersDatasAsync(hubId, projectId);
-    foreach (FolderContentsData folderContentsData in folderContentsDatas)
+    List<TopFoldersData> folderContentsDatas = (List<TopFoldersData>)await _apsService.GetTopFoldersDatasAsync(hubId, projectId, tokens);
+    foreach (TopFoldersData folderContentsData in folderContentsDatas)
     {
       dynamic dynamicFolder = getNewObject(folderContentsData);
       topfolders.Add(dynamicFolder);
@@ -240,14 +242,14 @@ public class DataManagementController : ControllerBase
     return items;
   }
 
-  public async Task GetFolderContents(string projectId, string folderId, string connectionId, string dataType, string projectGuid, string token)
+  public async Task GetFolderContents(string projectId, string folderId, string connectionId, string dataType, string projectGuid, Tokens tokens)
   {
-    await GetAllFolderContents(projectId, folderId, token, connectionId, dataType, projectGuid);
+    await GetAllFolderContents(projectId, folderId, connectionId, dataType, projectGuid, tokens);
   }
 
-  public async Task GetAllFolderContents(string projectId, string folderId, string token, string connectionId, string dataType, string projectGuid)
+  public async Task GetAllFolderContents(string projectId, string folderId, string connectionId, string dataType, string projectGuid, Tokens tokens)
   {
-    FolderContents folderContents = await _apsService.GetFolderContentsDatasAsync(projectId, folderId);
+    FolderContents folderContents = await _apsService.GetFolderContentsDatasAsync(projectId, folderId, tokens);
 
     List<dynamic> items = AddItems(folderContents);
 
@@ -257,7 +259,7 @@ public class DataManagementController : ControllerBase
       while (folderContents.Links.Next != null)
       {
         pageNumber++;
-        folderContents = await _apsService.GetFolderContentsDatasAsync(projectId, folderId, pageNumber);
+        folderContents = await _apsService.GetFolderContentsDatasAsync(projectId, folderId, pageNumber, tokens);
 
         List<dynamic> newItems = AddItems(folderContents);
         items.AddRange(newItems);
@@ -297,6 +299,45 @@ public class DataManagementController : ControllerBase
       items.Add(newItem);
     }
     return items;
+  }
+
+  public static dynamic getNewObject(TopFoldersData folderContentItem)
+  {
+    dynamic newItem = new System.Dynamic.ExpandoObject();
+    newItem.createTime = folderContentItem.Attributes.CreateTime;
+    newItem.createUserId = folderContentItem.Attributes.CreateUserId;
+    newItem.createUserName = folderContentItem.Attributes.CreateUserName;
+    newItem.lastModifiedTime = folderContentItem.Attributes.LastModifiedTime;
+    newItem.lastModifiedUserId = folderContentItem.Attributes.LastModifiedUserId;
+    newItem.lastModifiedUserName = folderContentItem.Attributes.LastModifiedUserName;
+    newItem.hidden = folderContentItem.Attributes.Hidden;
+    newItem.id = folderContentItem.Id;
+    newItem.timestamp = DateTime.UtcNow.ToLongDateString();
+
+    string extension = folderContentItem.Attributes.Extension.Type;
+    switch (extension)
+    {
+      case "folders:autodesk.bim360:Folder":
+        newItem.name = folderContentItem.Attributes.Name;
+        newItem.filesInside = 0;
+        newItem.foldersInside = 0;
+        newItem.type = "folder";
+        break;
+      case "items:autodesk.bim360:File":
+        newItem.name = folderContentItem.Attributes.DisplayName;
+        newItem.type = "file";
+        break;
+      case "items:autodesk.bim360:Document":
+        newItem.name = folderContentItem.Attributes.DisplayName;
+        newItem.type = "file";
+        break;
+      default:
+        newItem.name = folderContentItem.Attributes.DisplayName;
+        newItem.type = "file";
+        break;
+    }
+
+    return newItem;
   }
 
   public static dynamic getNewObject(FolderContentsData folderContentItem)

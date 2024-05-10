@@ -47,12 +47,13 @@ $(document).ready(function () {
     });
 
     $('#autodeskSigninButton').click(function () {
-        jQuery.ajax({
-            url: '/api/aps/oauth/url',
-            success: function (url) {
-                location.href = url;
-            }
-        });
+        // jQuery.ajax({
+        //     url: '/api/aps/oauth/signin',
+        //     success: function (url) {
+        //         window.location.replace(url);
+        //     }
+        // });
+        window.location.replace('/api/aps/oauth/signin');
     });
 
     $('input[type=radio][name=filter_by]').change(function () {

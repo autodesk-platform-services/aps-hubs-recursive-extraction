@@ -27,13 +27,6 @@ public class UserController : ControllerBase
   [Route("api/aps/user/profile")]
   public async Task<JObject> GetUserProfileAsync()
   {
-    Credentials credentials = await Credentials.FromSessionAsync(Request.Cookies, Response.Cookies);
-    if (credentials == null)
-    {
-      return null;
-    }
-
-
     // prepare a response with name & picture
     dynamic response = new JObject();
     // response.name = string.Format("{0} {1}", userProfile.firstName, userProfile.lastName);
