@@ -62,7 +62,7 @@ Right-click on the project, then go to **Debug**. Adjust the settings as shown b
 - ASPNETCORE_ENVIRONMENT: `Development`
 - APS_CLIENT_ID: `your id here`
 - APS_CLIENT_SECRET: `your secret here`
-- APS_CALLBACK_URL: `http://localhost:3000/api/aps/callback/oauth`
+- APS_CALLBACK_URL: `http://localhost:8080/api/aps/callback/oauth`
 - ITEMS_COLLECTION: `your collection for temporary storage of files and folders`
 - HANGFIREDATABASE: `Hangfire database name`
 - MONGO_CONNECTOR: `your mongodb connection string`
@@ -77,9 +77,9 @@ At the `.vscode\launch.json`, find the env vars and add your APS Client ID, Secr
 ```json
 "env": {
   "ASPNETCORE_ENVIRONMENT": "Development",
-  "ASPNETCORE_URLS" : "http://localhost:3000",
+  "ASPNETCORE_URLS" : "http://localhost:8080",
   "ITEMS_COLLECTION": "your collection for temporary storage of files and folders",
-  "APS_CALLBACK_URL": "http://localhost:3000/api/aps/callback/oauth",
+  "APS_CALLBACK_URL": "http://localhost:8080/api/aps/callback/oauth",
   "APS_CLIENT_SECRET": "your client secret here",
   "HANGFIREDATABASE": "Hangfire database name",
   "MONGO_CONNECTOR": "your mongodb connection string",
