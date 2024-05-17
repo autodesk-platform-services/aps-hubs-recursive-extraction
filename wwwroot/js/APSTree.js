@@ -126,7 +126,6 @@ function prepareUserHubsTree() {
     });
 }
 
-
 function showUser() {
     jQuery.ajax({
         url: '/api/aps/user/profile',
