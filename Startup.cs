@@ -27,7 +27,6 @@ public class Startup
     // services.AddMvc(options => options.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddNewtonsoftJson();
 
     //you will use some way to get your connection string
-    // var mongoConnection = Environment.GetEnvironmentVariable("MONGO_CONNECTOR");
     var mongoConnection = Configuration["MONGO_CONNECTOR"];
     var migrationOptions = new MongoMigrationOptions
     {
@@ -53,14 +52,14 @@ public class Startup
       o.MaximumReceiveMessageSize = 10240; // bytes
     });
 
-    var ForgeClientID = Configuration["APS_CLIENT_ID"];
-    var ForgeClientSecret = Configuration["APS_CLIENT_SECRET"];
-    var ForgeCallbackURL = Configuration["APS_CALLBACK_URL"];
-    if (string.IsNullOrEmpty(ForgeClientID) || string.IsNullOrEmpty(ForgeClientSecret) || string.IsNullOrEmpty(ForgeCallbackURL))
+    var APSClientID = Configuration["APS_CLIENT_ID"];
+    var APSClientSecret = Configuration["APS_CLIENT_SECRET"];
+    var APSCallbackURL = Configuration["APS_CALLBACK_URL"];
+    if (string.IsNullOrEmpty(APSClientID) || string.IsNullOrEmpty(APSClientSecret) || string.IsNullOrEmpty(APSCallbackURL))
     {
       throw new ApplicationException("Missing required environment variables APS_CLIENT_ID, APS_CLIENT_SECRET, or APS_CALLBACK_URL.");
     }
-    services.AddSingleton<APSService>(new APSService(ForgeClientID, ForgeClientSecret, ForgeCallbackURL));
+    services.AddSingleton<APSService>(new APSService(APSClientID, APSClientSecret, APSCallbackURL));
   }
 
   // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,7 +81,5 @@ public class Startup
       endpoints.MapControllers();
       endpoints.MapHub<ContentsHub>("/contentshub");
     });
-
   }
-
 }
