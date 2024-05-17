@@ -69,9 +69,7 @@ public class Startup
 
     app.UseDefaultFiles();
     app.UseStaticFiles();
-
-    app.UseHangfireDashboard();
-
+    // app.UseHangfireDashboard();
     app.UseRouting();
     app.UseEndpoints(endpoints =>
     {
