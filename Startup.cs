@@ -24,9 +24,6 @@ public class Startup
   // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
   public void ConfigureServices(IServiceCollection services)
   {
-    // services.AddMvc(options => options.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddNewtonsoftJson();
-
-    //you will use some way to get your connection string
     var mongoConnection = Configuration["MONGO_CONNECTOR"];
     var migrationOptions = new MongoMigrationOptions
     {
@@ -40,7 +37,7 @@ public class Startup
       config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
       config.UseSimpleAssemblyNameTypeSerializer();
       config.UseRecommendedSerializerSettings();
-      config.UseMongoStorage(mongoConnection, hanfireDatabase, new MongoStorageOptions { MigrationOptions = migrationOptions });
+      config.UseMongoStorage(mongoConnection, hanfireDatabase, new MongoStorageOptions { MigrationOptions = migrationOptions, CheckConnection = false });
 
     });
     services.AddHangfireServer();
