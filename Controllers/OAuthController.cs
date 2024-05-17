@@ -62,6 +62,13 @@ public class OAuthController : ControllerBase
     return tokens;
   }
 
+  [HttpGet("clientid")]
+  public async Task<dynamic> ClientId()
+  {
+    var clientid = await _apsService.GetClientId();
+    return new { id = clientid };
+  }
+
   [HttpGet("signin")]
   public ActionResult Signin()
   {

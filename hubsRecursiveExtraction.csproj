@@ -11,10 +11,10 @@
   <ItemGroup>
     <PackageReference Include="Autodesk.Authentication" Version="1.0.0" />
     <PackageReference Include="Autodesk.DataManagement" Version="1.0.0" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.24" />
-    <PackageReference Include="Hangfire.Mongo" Version="0.7.24" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.12" />
+    <PackageReference Include="Hangfire.Mongo" Version="1.10.6" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.29" />
-    <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
   </ItemGroup>
 
 </Project>

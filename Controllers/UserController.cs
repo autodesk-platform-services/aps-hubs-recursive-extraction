@@ -16,6 +16,7 @@
 // UNINTERRUPTED OR ERROR FREE.
 /////////////////////////////////////////////////////////////////////
 
+using Autodesk.Authentication.Model;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
@@ -23,14 +24,23 @@ using System.Threading.Tasks;
 
 public class UserController : ControllerBase
 {
+  public readonly APSService _apsService;
+
+  public UserController(APSService apsService)
+  {
+    _apsService = apsService;
+  }
   [HttpGet]
   [Route("api/aps/user/profile")]
-  public async Task<JObject> GetUserProfileAsync()
+  public async Task<dynamic> GetUserProfileAsync()
   {
-    // prepare a response with name & picture
-    dynamic response = new JObject();
-    // response.name = string.Format("{0} {1}", userProfile.firstName, userProfile.lastName);
-    // response.picture = userProfile.profileImages.sizeX40;
-    return response;
+    Tokens tokens = OAuthController.PrepareTokens(Request, Response, _apsService).GetAwaiter().GetResult();
+    if (tokens == null)
+    {
+      return null;
+    }
+    UserInfo userInfo = await _apsService.GetUserProfile(tokens);
+    return new { name = userInfo.Name, picture = userInfo.Picture };
+
   }
 }

@@ -70,13 +70,10 @@ public partial class APSService
         };
     }
 
-    public async Task<dynamic> GetUserProfile(Tokens tokens)
+    public async Task<UserInfo> GetUserProfile(Tokens tokens)
     {
-        return "";
-        // var api = new UserProfileApi();
-        // api.Configuration.AccessToken = tokens.InternalToken;
-        // dynamic profile = await api.GetUserProfileAsync();
-        // return profile;
+        UserInfo userInfo = await _authClient.GetUserInfoAsync(tokens.InternalToken);
+        return userInfo;
     }
 
     public async Task<IEnumerable<dynamic>> GetVersions(string projectId, string itemId, Tokens tokens)
@@ -113,5 +110,10 @@ public partial class APSService
     {
         FolderContents folderContents = await _dataManagementClient.GetFolderContentsAsync(projectId, folderId, pageNumber: pageNumber, accessToken: tokens.InternalToken);
         return folderContents;
+    }
+
+    internal async Task<string> GetClientId()
+    {
+        return _clientId;
     }
 }

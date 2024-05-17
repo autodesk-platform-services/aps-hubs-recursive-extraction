@@ -63,7 +63,7 @@ $(document).ready(function () {
         (!!itemsTable ? itemsTable.exportData() : alert("Please, click on a project and wait for the conclusion of the steps before extracting the data!"));
     });
 
-    $.getJSON("/api/aps/clientid", function (res) {
+    $.getJSON("/api/aps/oauth/clientid", function (res) {
         $("#ClientID").val(res.id);
         $("#provisionAccountSave").click(function () {
             $('#provisionAccountModal').modal('toggle');
