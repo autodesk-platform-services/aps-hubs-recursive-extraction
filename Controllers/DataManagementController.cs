@@ -21,13 +21,10 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MongoDB.Driver;
-using MongoDB.Bson.Serialization.Attributes;
 using Microsoft.AspNetCore.SignalR;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson;
 using System.Linq;
 using Autodesk.DataManagement.Model;
+using Newtonsoft.Json;
 
 
 public class DataManagementController : ControllerBase
@@ -92,7 +89,7 @@ public class DataManagementController : ControllerBase
 
     string jobId = BackgroundJob.Enqueue(() =>
       // the API SDK
-      GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, tokens).GetAwaiter().GetResult()
+      GatherData(connectionId, hubId, projectId, currentFolderId, dataType, projectGuid, tokens)
     );
 
     return new { Success = true };
@@ -100,17 +97,7 @@ public class DataManagementController : ControllerBase
 
   public async Task GatherData(string connectionId, string hubId, string projectId, string currentFolderId, string dataType, string projectGuid, Tokens tokens)
   {
-    switch (dataType)
-    {
-      case "topFolders":
-        await GetProjectContents(hubId, projectId, connectionId, dataType, projectGuid, tokens);
-        break;
-      case "folder":
-        await GetFolderContents(projectId, currentFolderId, connectionId, dataType, projectGuid, tokens);
-        break;
-      default:
-        break;
-    }
+    await GetProjectContents(hubId, projectId, connectionId, dataType, projectGuid, tokens);
   }
 
   private async Task<IList<jsTreeNode>> GetHubsAsync(Tokens tokens)
@@ -179,72 +166,32 @@ public class DataManagementController : ControllerBase
 
   public async Task GetProjectContents(string hubId, string projectId, string connectionId, string dataType, string projectGuid, Tokens tokens)
   {
-    List<dynamic> topfolders = new List<dynamic>();
-
     List<TopFoldersData> folderContentsDatas = (List<TopFoldersData>)await _apsService.GetTopFoldersDatasAsync(hubId, projectId, tokens);
     foreach (TopFoldersData folderContentsData in folderContentsDatas)
     {
-      dynamic dynamicFolder = getNewObject(folderContentsData);
-      topfolders.Add(dynamicFolder);
+      dynamic newFolder = getNewObject(folderContentsData);
+      string newFolderString = JsonConvert.SerializeObject(newFolder);
+      ContentsHub.SendData(_contentsHub, connectionId, dataType, newFolderString, null);
+      ContentsHub.SendUpdate(_contentsHub, connectionId, 0, 1);
+      GetFolderContents(projectId, folderContentsData.Id, connectionId, "folder", projectGuid, tokens);
     }
-
-    string jobGuid = Guid.NewGuid().ToString();
-    await AddItemsToDb(jobGuid, topfolders);
-    await ContentsHub.SendContents(_contentsHub, connectionId, jobGuid, dataType, projectGuid, null);
-  }
-
-  public async Task AddItemsToDb(string jobGuid, List<dynamic> items)
-  {
-    MongoClient client = new MongoClient(Environment.GetEnvironmentVariable("MONGO_CONNECTOR"));
-
-    IMongoDatabase database = client.GetDatabase(Environment.GetEnvironmentVariable("ITEMS_DB"));
-    var itemsCollection = database.GetCollection<ItemsCollection>(Environment.GetEnvironmentVariable("ITEMS_COLLECTION"));
-    foreach (var item in items)
-    {
-      ItemsCollection newItem = new ItemsCollection()
-      {
-        jobGuid = jobGuid,
-        item = item
-      };
-      itemsCollection.InsertOne(newItem);
-    }
-  }
-
-  [HttpGet]
-  [Route("api/aps/resource/items")]
-  public List<dynamic> GetItemsFromDb()
-  {
-    string jobGuid = base.Request.Query["jobGuid"];
-
-    try
-    {
-      BsonClassMap.RegisterClassMap<ItemsCollection>();
-    }
-    catch (Exception)
-    {
-
-    }
-
-    MongoClient client = new MongoClient(Environment.GetEnvironmentVariable("MONGO_CONNECTOR"));
-
-    IMongoDatabase database = client.GetDatabase(Environment.GetEnvironmentVariable("ITEMS_DB"));
-
-    var items_collection = database.GetCollection<ItemsCollection>(Environment.GetEnvironmentVariable("ITEMS_COLLECTION"));
-
-    List<ItemsCollection> retornados = items_collection.Find(colitem => colitem.jobGuid == jobGuid).ToList();
-
-    List<dynamic> items = retornados.Select(o => o.item).ToList();
-
-    var bson_collection = database.GetCollection<BsonDocument>(Environment.GetEnvironmentVariable("ITEMS_COLLECTION"));
-    var filter = Builders<BsonDocument>.Filter.Eq("jobGuid", jobGuid);
-    bson_collection.DeleteManyAsync(filter);
-
-    return items;
   }
 
   public async Task GetFolderContents(string projectId, string folderId, string connectionId, string dataType, string projectGuid, Tokens tokens)
   {
-    await GetAllFolderContents(projectId, folderId, connectionId, dataType, projectGuid, tokens);
+    string jobId = "";
+    try
+    {
+      jobId = BackgroundJob.Enqueue(() =>
+        // the API SDK
+        GetAllFolderContents(projectId, folderId, connectionId, dataType, projectGuid, tokens)
+      );
+    }
+    catch (Exception ex)
+    {
+      BackgroundJob.Requeue(jobId);
+    }
+
   }
 
   public async Task GetAllFolderContents(string projectId, string folderId, string connectionId, string dataType, string projectGuid, Tokens tokens)
@@ -268,11 +215,17 @@ public class DataManagementController : ControllerBase
     catch (Exception)
     { }
 
-    string jobGuid = Guid.NewGuid().ToString();
-
-    await AddItemsToDb(jobGuid, items);
-
-    await ContentsHub.SendContents(_contentsHub, connectionId, jobGuid, dataType, projectGuid, folderId);
+    foreach (dynamic item in items)
+    {
+      string newItemString = JsonConvert.SerializeObject(item);
+      ContentsHub.SendData(_contentsHub, connectionId, dataType, newItemString, folderId);
+      if (item.type == "folder")
+      {
+        ContentsHub.SendUpdate(_contentsHub, connectionId, 0, 1);
+        GetFolderContents(projectId, item.id, connectionId, "folder", projectGuid, tokens);
+      }
+    }
+    ContentsHub.SendUpdate(_contentsHub, connectionId, 1, 0);
   }
 
   public static List<dynamic> AddItems(FolderContents folderContents)
@@ -397,14 +350,6 @@ public class DataManagementController : ControllerBase
       dynamicAuxMissing.size = "";
       return dynamicAuxMissing;
     }
-  }
-
-
-  [BsonIgnoreExtraElements]
-  public class ItemsCollection
-  {
-    public string jobGuid { get; set; }
-    public dynamic item { get; set; }
   }
 
   public class jsTreeNode

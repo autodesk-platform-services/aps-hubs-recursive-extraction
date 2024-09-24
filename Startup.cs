@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using Hangfire.Mongo;
-using Hangfire.Mongo.Migration.Strategies;
-using Hangfire.Mongo.Migration.Strategies.Backup;
 using Hangfire;
 using Microsoft.Extensions.Configuration;
+using Hangfire.MemoryStorage;
 
 
 public class Startup
@@ -24,20 +22,12 @@ public class Startup
   // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
   public void ConfigureServices(IServiceCollection services)
   {
-    var mongoConnection = Configuration["MONGO_CONNECTOR"];
-    var migrationOptions = new MongoMigrationOptions
-    {
-      MigrationStrategy = new MigrateMongoMigrationStrategy(),
-      BackupStrategy = new CollectionMongoBackupStrategy()
-    };
-
-    var hanfireDatabase = Configuration["HANGFIREDATABASE"];
     services.AddHangfire(config =>
     {
       config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
       config.UseSimpleAssemblyNameTypeSerializer();
       config.UseRecommendedSerializerSettings();
-      config.UseMongoStorage(mongoConnection, hanfireDatabase, new MongoStorageOptions { MigrationOptions = migrationOptions, CheckConnection = false });
+      config.UseMemoryStorage();
 
     });
     services.AddHangfireServer();
@@ -69,7 +59,7 @@ public class Startup
 
     app.UseDefaultFiles();
     app.UseStaticFiles();
-    // app.UseHangfireDashboard();
+    app.UseHangfireDashboard();
     app.UseRouting();
     app.UseEndpoints(endpoints =>
     {

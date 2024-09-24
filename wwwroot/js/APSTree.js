@@ -122,6 +122,7 @@ function prepareUserHubsTree() {
             $('#statusLabel').append('<label>reading project ' + data.node.text + '...</label>');
             itemsTable = new ItemsTable("itemsTable", data.node.id.split('/')[6], data.node.id.split('/')[8]);
             itemsTable.getReport();
+            itemsTable.drawTable();
         }
     });
 }

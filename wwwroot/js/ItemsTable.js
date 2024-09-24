@@ -101,10 +101,6 @@ class ItemsTable {
             for(const columnTitle of visibleColumns){
                 auxRow.push(typeof rowObject[columnTitle] === "string" ? rowObject[columnTitle].replaceAll(',', ' ') : rowObject[columnTitle]);
             }
-            // for (const rowKey in rowObject) {
-            //     if (visibleColumns.includes(rowKey))
-            //         auxRow.push(typeof rowObject[rowKey] === "string" ? rowObject[rowKey].replaceAll(',', ' ') : rowObject[rowKey]);
-            // }
             clearedCsvData.push(auxRow);
         }
         return clearedCsvData;
@@ -184,7 +180,6 @@ class ItemsTable {
                 break;
         }
 
-
         return tableColumns;
     }
 
@@ -214,29 +209,8 @@ class ItemsTable {
         });
     }
 
-    updateItemsInside(currentFolderId, totalFiles, totalFolders) {
-        let currentFolder = this.items.filter(f => f.id === currentFolderId)[0];
-
-        currentFolder.filesInside += totalFiles;
-        currentFolder.foldersInside += totalFolders;
-
-        let currentFullPath = this.fullPaths[currentFolderId];
-
-        let folders = currentFullPath.split('/');
-
-        if (folders.length > 1) {
-            folders.pop();
-            let parentFolderFullPath = folders.join('/');
-            let parentFolderId = Object.keys(this.fullPaths).find(key => this.fullPaths[key] === parentFolderFullPath);
-
-            this.updateItemsInside(parentFolderId, totalFiles, totalFolders);
-        }
-        
-    }
-
     async fetchDataAsync( currentFolderId = null, dataType ) {
-        this.requests ++;
-        this.updateStatus();
+        // this.updateStatus(0,0);
         try {
             const requestUrl = '/api/aps/resource/info';
             const requestData = {
@@ -255,46 +229,29 @@ class ItemsTable {
         }
     }
 
-    async getReadyItems(dataType, contentsGuid, parentFolderId){
-
-        const requestUrl = 'api/aps/resource/items';
-        const requestData = {
-            'jobGuid': contentsGuid
-        };
-        let contents = await apiClientAsync(requestUrl, requestData);
-
-        this.responses ++;
-        this.updateStatus();
-
-        this.items.push(...contents);
+    async addItem(dataType, folderData, parentFolderId){
+        let jsonFolderData = JSON.parse(folderData);
+        this.items.push(jsonFolderData);
 
         switch (dataType) {
             case 'topFolders': {
-                for (const rawItem of contents) {
-                    this.fullPaths[rawItem.id] = rawItem.name;
-                }
-                this.drawTable();
+                this.fullPaths[jsonFolderData.id] = jsonFolderData.name;
                 break;
             }
             case 'folder': {
                 let parentFullPath = this.fullPaths[parentFolderId];
-                for (const rawItem of contents) {
-                    this.fullPaths[rawItem.id] = `${parentFullPath}/${rawItem.name}`;
-                }
-                let totalFiles = contents.filter(i => i.type === 'file').length;
-                let totalFolders = contents.filter(i => i.type === 'folder').length;
-                this.updateItemsInside(parentFolderId, totalFiles, totalFolders);
-                this.refreshTable();
+                this.fullPaths[jsonFolderData.id] = `${parentFullPath}/${jsonFolderData.name}`;
+                let parentFolder = this.items.filter(f => f.id === parentFolderId)[0];
+                jsonFolderData.type=='folder'? parentFolder.foldersInside ++ : parentFolder.filesInside ++;
             };
         };
-    
-        for (const folderContent of contents) {
-            (folderContent.type == "folder" ? this.getFolderContents(folderContent) : null);
-        }
+        this.refreshTable();
 
     }
 
-    async updateStatus(){
+    async updateStatus(completedJobs, pendingJobs){
+        this.responses += completedJobs;
+        this.requests += pendingJobs;
         $('#statusLabel').empty();
         $('#statusLabel').append('<label>'+this.responses+' out of '+this.requests+' steps done!</label>');
     }
