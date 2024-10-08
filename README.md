@@ -51,7 +51,7 @@ Right-click on the project, then go to **Debug**. Adjust the settings as shown b
 - ASPNETCORE_ENVIRONMENT: `Development`
 - APS_CLIENT_ID: `your id here`
 - APS_CLIENT_SECRET: `your secret here`
-- APS_CALLBACK_URL: `http://localhost:8080/api/aps/callback/oauth`
+- APS_CALLBACK_URL: `http://localhost:8080/api/aps/oauth/callback`
 
 **Visual Sutdio Code** (Windows, MacOS):
 
@@ -63,7 +63,7 @@ At the `.vscode\launch.json`, find the env vars and add your APS Client ID, Secr
 "env": {
   "ASPNETCORE_ENVIRONMENT": "Development",
   "ASPNETCORE_URLS" : "http://localhost:8080",
-  "APS_CALLBACK_URL": "http://localhost:8080/api/aps/callback/oauth",
+  "APS_CALLBACK_URL": "http://localhost:8080/api/aps/oauth/callback",
   "APS_CLIENT_SECRET": "your client secret here",
   "APS_CLIENT_ID": "your client Id here"
 },
