@@ -1,3 +1,6 @@
+<!-- archived-notice -->
+> **This repository is archived.** Archived repositories are not maintained or supported.
+
 # Files and folders extraction sample
 
 ![Platforms](https://img.shields.io/badge/platform-Windows|MacOS-lightgray.svg)
